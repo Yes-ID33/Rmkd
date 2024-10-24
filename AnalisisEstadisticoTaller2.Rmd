@@ -1,0 +1,128 @@
+---
+title: "AnalisisEstadisticoTaller2"
+output: 
+  html_document:
+    toc: TRUE
+    toc_depth: 3
+    toc_float: TRUE
+    collapsed: TRUE
+    smooth_scroll: TRUE
+    theme: cerulean
+    df_print: paged
+    code_folding: show
+    
+date: "2024-10-24"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(tidyverse)
+library(plotly)
+library(MASS)
+library(psych)
+library(factoextra)
+library(GGally)
+library(dplyr)
+library(ggplot2)
+
+```
+
+# Visualización de los datos
+
+```{r}
+
+dfEnergiaPaises <- read.csv("./datos_taller_02.csv", header = TRUE, sep=';')
+
+dfEnergiaPaises
+
+```
+
+
+## Primeros puntos
+
+### Punto 1
+```{r}
+
+
+# Select the 5 variables of interest
+selected_data <- dfEnergiaPaises[, c("Distillate_fuel_oil_consumption_TBPD","Jet_fuel_consumption_TBPD", "Motor_gasoline_consumption_TBPD","Petroleum_and_other_liquids_consumption_TBPD","Electricity_net_consumption_BKWH")]
+
+# Calculate the mean vector
+prom_vector <- colMeans(selected_data, na.rm = TRUE)
+
+# Calculate the variance-covariance matrix
+var_cov_matrix <- cov(selected_data, use = "complete.obs")
+
+# Display the results
+print("Vector de los promedios:")
+print(prom_vector)
+
+print("Variance-Covariance Matrix:")
+print(var_cov_matrix)
+
+```
+### Punto 2
+```{r}
+#Análisis descriptivo univariado
+summary(dfEnergiaPaises)
+
+#Análisis descriptivo bivariado relaciones par-par
+
+# The `ggpairs()` function allows us to visualize both distributions and correlations between variables.
+
+# Visualizing pairwise relationships between variables
+ggpairs(selected_data)
+
+```
+
+### Punto 3
+```{r}
+# Remove country column (assuming the first column contains country names)
+# We'll only apply PCA to the numeric variables
+df_numeric <- dfEnergiaPaises[, -1] # This removes the first column (country names)
+
+# Standardizing the data for PCA
+standardized_data <- scale(df_numeric)
+
+# PCA with standardized data
+pca_standardized <- prcomp(standardized_data, scale = TRUE)
+fviz_pca_var(pca_standardized, axes = c(1, 2), repel=TRUE)
+
+# PCA without standardization
+pca_non_standardized <- prcomp(df_numeric, scale = FALSE)
+fviz_pca_var(pca_non_standardized, axes = c(1, 2), repel=TRUE)
+
+# Compare the results
+summary(pca_standardized)
+summary(pca_non_standardized)
+```
+### Punto 4
+```{r}
+# Visualizing the cumulative variance explained by each principal component
+fviz_eig(pca_standardized)
+
+# Using Kaiser criterion to select components with eigenvalues > 1
+eigenvalues <- pca_standardized$sdev^2
+selected_components <- sum(eigenvalues > 1)
+selected_components
+```
+#### Basado en el PCA normado (estandarizado), deberíamos seleccionar el número de componentes principales basándonos en los siguientes criterios:
+
+# 1. **Criterio de Kaiser**: Debemos seleccionar los componentes cuyos eigenvalores sean mayores a 1. 
+#    - Los componentes con eigenvalores mayores a 1 explican más varianza que cualquier variable original y se consideran significativos.
+#    - Esto ayuda a reducir la dimensionalidad mientras se conservan componentes significativos. Después de calcular los eigenvalores, retenemos aquellos donde λ > 1.
+
+# 2. **Umbral de Varianza Explicada**: Otro enfoque es retener suficientes componentes para explicar una proporción suficiente de la varianza (por ejemplo, 80% o 90% de la varianza acumulada).
+#    - Se puede visualizar la varianza explicada usando un scree plot y observar el punto donde agregar más componentes comienza a contribuir muy poca varianza adicional (punto de "codo").
+#    - El número de componentes seleccionados bajo este criterio es donde alcanzamos el porcentaje deseado de varianza acumulada.
+
+# Decisión Final: Usando tanto el criterio de Kaiser como el umbral de varianza explicada, decidimos el número óptimo de componentes, equilibrando la simplicidad y la preservación de la varianza.
+
+### Punto 5
+```{r}
+
+```
+
+
+
