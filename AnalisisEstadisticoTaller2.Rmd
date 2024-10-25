@@ -87,11 +87,11 @@ standardized_data <- scale(df_numeric)
 
 # PCA with standardized data
 pca_standardized <- prcomp(standardized_data, scale = TRUE)
-fviz_pca_var(pca_standardized, axes = c(1, 2), repel=TRUE)
+fviz_pca_var(pca_standardized, axes = c(1, 2), repel=TRUE, labelsize=2)
 
 # PCA without standardization
 pca_non_standardized <- prcomp(df_numeric, scale = FALSE)
-fviz_pca_var(pca_non_standardized, axes = c(1, 2), repel=TRUE)
+fviz_pca_var(pca_non_standardized, axes = c(1, 2), repel=TRUE, labelsize=2)
 
 # Compare the results
 summary(pca_standardized)
@@ -121,8 +121,43 @@ selected_components
 
 ### Punto 5
 ```{r}
+# Load necessary libraries
+library(factoextra)
+
+# Perform PCA on the standardized dataset (excluding the country column)
+df_numeric <- dfEnergiaPaises[, -1] # Remove country column
+pca_result <- prcomp(scale(df_numeric))
+
+# Visualize the variables on the first factorial plane (PC1 vs PC2)
+# Selecting only the top 30 most contributing variables to avoid clutter
+fviz_pca_var(pca_result, 
+             axes = c(1, 2),        # Focus on PC1 and PC2
+             select.var = list(contrib = 12),  # Select the top 30 contributing variables
+             repel = TRUE,           # Avoid label overlap
+             labelsize = 2)          # Decrease label size to avoid saturation
 
 ```
+#### si Conclusión:
+Este análisis nos permite visualizar cómo las variables originales están representadas en el primer plano factorial, formado por las dos primeras componentes principales (PC1 y PC2). Al filtrar las 30 variables que más contribuyen y ajustar el tamaño de las etiquetas, podemos identificar mejor cuáles son las variables que tienen la mayor influencia en estas componentes.
+
+Las variables con flechas más largas o que se encuentran más alejadas del centro son las que más contribuyen a la variabilidad explicada por estas componentes principales. Estas componentes son importantes porque capturan la mayor parte de la varianza del conjunto de datos. A partir de este análisis, podemos concluir qué variables son clave para explicar las diferencias entre los países en términos de su consumo y producción energética.
+
+### Punto 6
+```{r}
+# Visualización de los países (individuos) en el segundo plano factorial (PC1 vs PC2)
+fviz_pca_ind(pca_result, 
+             axes = c(1, 2),        # Nos centramos en PC1 y PC2
+             repel = TRUE,           # Evita la superposición de etiquetas
+             labelsize = 3)          # Ajuste del tamaño de las etiquetas
+
+# Visualización de los países (individuos) en el primer plano factorial (PC3 vs PC4)
+fviz_pca_ind(pca_result, 
+             axes = c(3, 4),        # Nos centramos en PC1 y PC2
+             repel = TRUE,           # Evita la superposición de etiquetas
+             labelsize = 3)          # Ajuste del tamaño de las etiquetas
+
+```
+
 
 
 
