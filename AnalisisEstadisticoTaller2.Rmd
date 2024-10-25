@@ -12,10 +12,12 @@ output:
     code_folding: show
     
 date: "2024-10-24"
+
+author: "Cristina Sierra"
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 library(knitr)
 library(tidyverse)
 library(plotly)
@@ -40,10 +42,13 @@ dfEnergiaPaises
 
 ```
 
+#### Para este trabajo se utilizaron como 5 variables de interes, variables relacionadas con el consumo de energias de todo tipo, tanto fosiles como de electricidad.
 
-## Primeros puntos
 
-### Punto 1
+# **Primera parte** 
+> (Los valores atipicos existen, por lo cual multiples filas de datos pueden tener una afeccion significativa a datos medios)
+
+## Punto 1
 ```{r}
 
 
@@ -64,21 +69,21 @@ print("Variance-Covariance Matrix:")
 print(var_cov_matrix)
 
 ```
-### Punto 2
+
+## Punto 2
+
 ```{r}
 #Análisis descriptivo univariado
-summary(dfEnergiaPaises)
+summary(selected_data)
 
 #Análisis descriptivo bivariado relaciones par-par
 
-# The `ggpairs()` function allows us to visualize both distributions and correlations between variables.
-
-# Visualizing pairwise relationships between variables
 ggpairs(selected_data)
 
 ```
 
-### Punto 3
+## Punto 3
+
 ```{r}
 # Remove country column (assuming the first column contains country names)
 # We'll only apply PCA to the numeric variables
@@ -95,11 +100,26 @@ fviz_pca_var(pca_standardized, axes = c(1, 2), repel=TRUE, labelsize=2)
 pca_non_standardized <- prcomp(df_numeric, scale = FALSE)
 fviz_pca_var(pca_non_standardized, axes = c(1, 2), repel=TRUE, labelsize=2)
 
-# Compare the results
-summary(pca_standardized)
-summary(pca_non_standardized)
+
 ```
-### Punto 4
+
+### Datos estandarizaddos
+
+```{r}
+summary(pca_standardized)
+```
+
+### Datos **NO** estandarizados
+
+```{r}
+summary(pca_non_standardized)
+
+```
+
+
+
+## Punto 4
+
 ```{r}
 # Visualizing the cumulative variance explained by each principal component
 fviz_eig(pca_standardized)
@@ -109,19 +129,22 @@ eigenvalues <- pca_standardized$sdev^2
 selected_components <- sum(eigenvalues > 1)
 selected_components
 ```
-#### Basado en el PCA normado (estandarizado), deberíamos seleccionar el número de componentes principales basándonos en los siguientes criterios:
+> 4. conclusión
 
-# 1. **Criterio de Kaiser**: Debemos seleccionar los componentes cuyos eigenvalores sean mayores a 1. 
-#    - Los componentes con eigenvalores mayores a 1 explican más varianza que cualquier variable original y se consideran significativos.
-#    - Esto ayuda a reducir la dimensionalidad mientras se conservan componentes significativos. Después de calcular los eigenvalores, retenemos aquellos donde λ > 1.
+>Basado en el PCA normado (estandarizado), deberíamos seleccionar el número de componentes principales basándonos en los siguientes criterios:
 
-# 2. **Umbral de Varianza Explicada**: Otro enfoque es retener suficientes componentes para explicar una proporción suficiente de la varianza (por ejemplo, 80% o 90% de la varianza acumulada).
-#    - Se puede visualizar la varianza explicada usando un scree plot y observar el punto donde agregar más componentes comienza a contribuir muy poca varianza adicional (punto de "codo").
-#    - El número de componentes seleccionados bajo este criterio es donde alcanzamos el porcentaje deseado de varianza acumulada.
+> 1. **Criterio de Kaiser**: Debemos seleccionar los componentes cuyos eigenvalores sean mayores a 1. 
+    - Los componentes con eigenvalores mayores a 1 explican más varianza que cualquier variable original y se consideran significativos.
+    - Esto ayuda a reducir la dimensionalidad mientras se conservan componentes significativos. Después de calcular los eigenvalores, retenemos aquellos donde λ > 1.
 
-# Decisión Final: Usando tanto el criterio de Kaiser como el umbral de varianza explicada, decidimos el número óptimo de componentes, equilibrando la simplicidad y la preservación de la varianza.
+> 2. **Umbral de Varianza Explicada**: Otro enfoque es retener suficientes componentes para explicar una proporción suficiente de la varianza (por ejemplo, 80% o 90% de la varianza acumulada).
+    - Se puede visualizar la varianza explicada usando un scree plot y observar el punto donde agregar más componentes comienza a contribuir muy poca varianza adicional (punto de "codo").
+    - El número de componentes seleccionados bajo este criterio es donde alcanzamos el porcentaje deseado de varianza acumulada.
 
-### Punto 5
+> Decisión Final: Usando tanto el criterio de Kaiser como el umbral de varianza explicada, decidimos el número óptimo de componentes, equilibrando la simplicidad y la preservación de la varianza.
+
+## Punto 5
+
 ```{r}
 # Load necessary libraries
 library(factoextra)
@@ -139,12 +162,13 @@ fviz_pca_var(pca_result,
              labelsize = 2)          # Decrease label size to avoid saturation
 
 ```
-#### si Conclusión:
-Este análisis nos permite visualizar cómo las variables originales están representadas en el primer plano factorial, formado por las dos primeras componentes principales (PC1 y PC2). Al filtrar las 30 variables que más contribuyen y ajustar el tamaño de las etiquetas, podemos identificar mejor cuáles son las variables que tienen la mayor influencia en estas componentes.
+> 5. Conclusión:
 
-Las variables con flechas más largas o que se encuentran más alejadas del centro son las que más contribuyen a la variabilidad explicada por estas componentes principales. Estas componentes son importantes porque capturan la mayor parte de la varianza del conjunto de datos. A partir de este análisis, podemos concluir qué variables son clave para explicar las diferencias entre los países en términos de su consumo y producción energética.
+> Este análisis nos permite visualizar cómo las variables originales están representadas en el primer plano factorial, formado por las dos primeras componentes principales (PC1 y PC2). Al filtrar las 30 variables que más contribuyen y ajustar el tamaño de las etiquetas, podemos identificar mejor cuáles son las variables que tienen la mayor influencia en estas componentes.
 
-### Punto 6
+>Las variables con flechas más largas o que se encuentran más alejadas del centro son las que más contribuyen a la variabilidad explicada por estas componentes principales. Estas componentes son importantes porque capturan la mayor parte de la varianza del conjunto de datos. A partir de este análisis, podemos concluir qué variables son clave para explicar las diferencias entre los países en términos de su consumo y producción energética.
+
+## Punto 6
 ```{r}
 # Visualización de los países (individuos) en el segundo plano factorial (PC1 vs PC2)
 fviz_pca_ind(pca_result, 
@@ -160,10 +184,13 @@ fviz_pca_ind(pca_result,
 
 ```
 
-#### 6 Conclusión:
-Se puede concluir que en los 2 distintos planos, hay 4 países(individuos) que destacan que son China(21), Rusia(79), Saudi Arabia(80), USA(104), ya que en ambos planos son muy atípicos, aunque en el segundo hay otros que también son atípicos pero en conjunto no llegan a los 4 anteriormente mencionados, siendo así que sin estos, 4 individuos, todos los países estarían en un rango promedio de no demasiado uso de las energías y/o combustibles
+> 6 Conclusión:
 
-### Punto 7
+> Se puede concluir que en los 2 distintos planos, hay 4 países(individuos) que destacan que son China(21), Rusia(79), Saudi Arabia(80), USA(104), ya que en ambos planos son muy atípicos, aunque en el segundo hay otros que también son atípicos pero en conjunto no llegan a los 4 anteriormente mencionados, siendo así que sin estos, 4 individuos, todos los países estarían en un rango promedio de no demasiado uso de las energías y/o combustibles
+
+
+## Punto 7
+
 ```{r}
 # Crear el nuevo dataframe excluyendo los países atípicos basados en sus índices (China, Rusia, Arabia Saudita, USA)
 dfEnergiaPaisesBounded <- dfEnergiaPaises[-c(21, 79, 80, 104), ]
@@ -187,12 +214,18 @@ fviz_pca_ind(pca_cleaned, axes = c(1, 2), repel = TRUE, labelsize = 4)
 fviz_pca_ind(pca_cleaned, axes = c(2, 3), repel = TRUE, labelsize = 4)
 ```
 
-#### 7. Respuestas:
--
+> 7. Respuestas:
 
--
+> al tener menos valores atípicos es más fácil visualizar grupos con distancias más pequeñas entre si
+se perciben clusters de países con mayor claridad? 
 
-### Punto 8
+> Si, como las dimensiones ya tienen un menor porcentaje de peso total en cuanto a los datos, es más fácil ver grupos que coincidan entre D1 y D2 y sea más fácil ubicar un cluster de prueba uno mismo y agruparlos
+
+# **Segunda parte** 
+> (Eliminando Rusia, China, Arabia Saudita y USA debido a su afectacion a las correlaciones de los datos)
+
+## Punto 8
+
 ```{r}
 # Visualización del primer plano factorial (PC1 vs PC2)
 fviz_pca_ind(pca_cleaned, axes = c(1, 2), repel = TRUE, labelsize = 4)
@@ -201,10 +234,11 @@ fviz_pca_ind(pca_cleaned, axes = c(1, 2), repel = TRUE, labelsize = 4)
 
 ```
 
-#### conc punto8
-en donde hay más datos se pueden sacar 3 o 4 clusters, algunos atípicos podrían convertir este número en 5 o 6, incluso 7 si nos ponemos muy estrictos
+> 8. Respuestas:
 
-### Punto 9
+> en donde hay más datos se pueden sacar 3 o 4 clusters, algunos atípicos podrían convertir este número en 5 o 6, incluso 7 si nos ponemos muy estrictos
+
+## Punto 9
 
 ```{r}
 # Definir un rango de clusters para analizar
@@ -225,10 +259,13 @@ plot(1:max_clusters, wss[1:max_clusters], type = "b", pch = 19, frame = FALSE,
 
 ```
 
-#### conc. 9
-entre 4 y 6 clusters es la respuesta correcta
+> 9. conclusiones
 
-### Punto 10
+> entre 4 y 6 clusters es la respuesta correcta
+
+
+## Punto 10
+
 ```{r}
 
 # K-means Clustering
@@ -255,10 +292,11 @@ table(dfEnergiaPaisesBounded$KMeans_Group, dfEnergiaPaisesBounded$HCLUST_Group)
 
 ```
 
-#### conc punto 10
-sas
+> 10. conclusiones
 
-### Punto 11
+> Se evidencia que en el cluster 2 es donde se agrupan la mayor cantidad de datos, es por eso que los clusters restantes cuentan con un valor menos significativo de datos
+
+## Punto 11
 
 ```{r}
 selected_data_scaled <- scale(selected_data)
@@ -286,7 +324,9 @@ for (variable in colnames(selected_data)) {
 }
 ```
 
+> 11. conclusiones
 
+> Es la comprobación gráfica de la distribución de los clusters en un boxplot
 
 
 
