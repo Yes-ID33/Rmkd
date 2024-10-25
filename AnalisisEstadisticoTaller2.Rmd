@@ -25,6 +25,8 @@ library(factoextra)
 library(GGally)
 library(dplyr)
 library(ggplot2)
+library(cluster)
+
 
 ```
 
@@ -160,6 +162,131 @@ fviz_pca_ind(pca_result,
 
 #### 6 Conclusión:
 Se puede concluir que en los 2 distintos planos, hay 4 países(individuos) que destacan que son China(21), Rusia(79), Saudi Arabia(80), USA(104), ya que en ambos planos son muy atípicos, aunque en el segundo hay otros que también son atípicos pero en conjunto no llegan a los 4 anteriormente mencionados, siendo así que sin estos, 4 individuos, todos los países estarían en un rango promedio de no demasiado uso de las energías y/o combustibles
+
+### Punto 7
+```{r}
+# Crear el nuevo dataframe excluyendo los países atípicos basados en sus índices (China, Rusia, Arabia Saudita, USA)
+dfEnergiaPaisesBounded <- dfEnergiaPaises[-c(21, 79, 80, 104), ]
+
+# Eliminar la columna de países para el ACP, ya que no es numérica
+df_numeric_cleaned <- dfEnergiaPaisesBounded[, -1]  # Excluir la columna de nombres de países
+
+# Estandarizar los datos (normado)
+df_scaled_cleaned <- scale(df_numeric_cleaned)
+
+# Realizar el ACP normado
+pca_cleaned <- prcomp(df_scaled_cleaned)
+
+# Visualizar la representación de las variables en el primer plano factorial (PC1 vs PC2)
+fviz_pca_var(pca_cleaned, axes = c(1, 2), repel = TRUE, labelsize = 4)
+
+# Visualizar la representación de los países (individuos) en el primer plano factorial (PC1 vs PC2)
+fviz_pca_ind(pca_cleaned, axes = c(1, 2), repel = TRUE, labelsize = 4)
+
+# Visualizar los países en el segundo plano factorial (PC2 vs PC3)
+fviz_pca_ind(pca_cleaned, axes = c(2, 3), repel = TRUE, labelsize = 4)
+```
+
+#### 7. Respuestas:
+-
+
+-
+
+### Punto 8
+```{r}
+# Visualización del primer plano factorial (PC1 vs PC2)
+fviz_pca_ind(pca_cleaned, axes = c(1, 2), repel = TRUE, labelsize = 4)
+
+# Observamos el gráfico y contamos los posibles clusters que parecen formarse.
+
+```
+
+#### conc punto8
+en donde hay más datos se pueden sacar 3 o 4 clusters, algunos atípicos podrían convertir este número en 5 o 6, incluso 7 si nos ponemos muy estrictos
+
+### Punto 9
+
+```{r}
+# Definir un rango de clusters para analizar
+max_clusters <- 10  # Cambié el límite a 10, ya que tienes una iteración hasta 11
+wss <- numeric(max_clusters)  # Almacenar la suma de las distancias dentro de los clusters
+
+# Calcular la suma de las distancias dentro de los clusters para cada número de clusters (k)
+for (k in 1:max_clusters) {
+  km_result <- kmeans(df_scaled_cleaned, centers = k, nstart = 33)
+  wss[k] <- km_result$tot.withinss
+}
+
+# Graficar el método del codo
+plot(1:max_clusters, wss[1:max_clusters], type = "b", pch = 19, frame = FALSE,
+     xlab = "Número de Clusters (k)", 
+     ylab = "Suma de las Distancias Dentro de los Clusters (WSS)")
+
+
+```
+
+#### conc. 9
+entre 4 y 6 clusters es la respuesta correcta
+
+### Punto 10
+```{r}
+
+# K-means Clustering
+set.seed(123)  # Para reproducibilidad
+k <- 3  # Elegimos 4 clusters como ejemplo, ajústalo según el análisis anterior
+kmeans_result <- kmeans(df_scaled_cleaned, centers = k, nstart = 25)
+
+# Agregar los resultados de k-means al dataframe original
+dfEnergiaPaisesBounded$KMeans_Group <- as.factor(kmeans_result$cluster)
+
+
+# Aglomeración Jerárquica
+
+# Calculando la distancia y realizando el clustering jerárquico
+dist_matrix <- dist(df_scaled_cleaned)  # Matriz de distancias
+hclust_result <- hclust(dist_matrix, method = "average")  # Aglomeración jerárquica
+clusters_hclust <- cutree(hclust_result, k)  # Cortar en 3 clusters
+
+# Agregar los resultados de aglomeración jerárquica al dataframe
+dfEnergiaPaisesBounded$HCLUST_Group <- as.factor(clusters_hclust)
+
+# Comparar los grupos obtenidos
+table(dfEnergiaPaisesBounded$KMeans_Group, dfEnergiaPaisesBounded$HCLUST_Group)
+
+```
+
+#### conc punto 10
+sas
+
+### Punto 11
+
+```{r}
+selected_data_scaled <- scale(selected_data)
+
+# 3. Perform k-means clustering (you can adjust the value of k based on your analysis)
+set.seed(123)  # Setting seed for reproducibility
+kmeans_result <- kmeans(selected_data_scaled, centers = 3, nstart = 25)  # Using k = 3 as an example
+
+# 4. Add the cluster labels to the original data
+dfEnergiaPaises$cluster <- as.factor(kmeans_result$cluster)
+
+# 5. Create boxplots for each variable, differentiated by cluster
+# Loop through each variable to create a boxplot for each, grouped by clusters
+for (variable in colnames(selected_data)) {
+  p <- ggplot(dfEnergiaPaises, aes(x = cluster, y = .data[[variable]], fill = cluster)) +
+    geom_boxplot() +
+    labs(title = paste("Boxplot of", variable, "by K-means clusters"), 
+         x = "Cluster", y = variable) +
+    theme_minimal() +
+    theme(legend.position = "none") +
+    scale_fill_brewer(palette = "Set3")
+  
+  # Explicitly print the plot
+  print(p)
+}
+```
+
+
 
 
 
