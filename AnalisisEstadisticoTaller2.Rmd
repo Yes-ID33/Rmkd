@@ -12,12 +12,10 @@ output:
     code_folding: show
     
 date: "2024-10-24"
-
-author: ":)"
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = TRUE)
 library(knitr)
 library(tidyverse)
 library(plotly)
@@ -30,62 +28,53 @@ library(ggplot2)
 
 ```
 
+# Visualización de los datos
+
 ```{r}
-# Cargamos los datos aqui para su posterior uso
+
 dfEnergiaPaises <- read.csv("./datos_taller_02.csv", header = TRUE, sep=';')
+
+dfEnergiaPaises
+
 ```
 
 
+## Primeros puntos
 
-## Punto 1
-
+### Punto 1
 ```{r}
 
-# Seleccion de 5 variables
+
+# Select the 5 variables of interest
 selected_data <- dfEnergiaPaises[, c("Distillate_fuel_oil_consumption_TBPD","Jet_fuel_consumption_TBPD", "Motor_gasoline_consumption_TBPD","Petroleum_and_other_liquids_consumption_TBPD","Electricity_net_consumption_BKWH")]
 
-# Calcular el promedio de las columnas
+# Calculate the mean vector
 prom_vector <- colMeans(selected_data, na.rm = TRUE)
 
-# Calcular la matriz de variancia y covariancia
+# Calculate the variance-covariance matrix
 var_cov_matrix <- cov(selected_data, use = "complete.obs")
 
-```
-
-
-#### Vector de promedios para las 5 variables 
-
-#### Estas variables fueron elegidas en base a consumos de combustibles fosibles y electricidad
-
-```{r}
+# Display the results
+print("Vector de los promedios:")
 print(prom_vector)
-```
 
-#### Matriz de variancia y covariancia
-
-```{r}
+print("Variance-Covariance Matrix:")
 print(var_cov_matrix)
+
 ```
-
-## Punto 2
-
-> Realizamos el analisis univariado de cada una de las variables (Exeptuando el nombre de los paises o únicamente valore cuantitativos) para obtener las medidas de tendencia central.
+### Punto 2
 ```{r}
 #Análisis descriptivo univariado
-
 summary(dfEnergiaPaises)
-```
 
-> El analisis descriptivo bivariado permite observar la correlacion entre cada una de las 5 variables seleccionadas 
-
-```{r}
 #Análisis descriptivo bivariado relaciones par-par
 
+# The `ggpairs()` function allows us to visualize both distributions and correlations between variables.
 
 # Visualizing pairwise relationships between variables
 ggpairs(selected_data)
-```
 
+```
 
 ### Punto 3
 ```{r}
@@ -168,6 +157,9 @@ fviz_pca_ind(pca_result,
              labelsize = 3)          # Ajuste del tamaño de las etiquetas
 
 ```
+
+#### 6 Conclusión:
+Se puede concluir que en los 2 distintos planos, hay 4 países(individuos) que destacan que son China(21), Rusia(79), Saudi Arabia(80), USA(104), ya que en ambos planos son muy atípicos, aunque en el segundo hay otros que también son atípicos pero en conjunto no llegan a los 4 anteriormente mencionados, siendo así que sin estos, 4 individuos, todos los países estarían en un rango promedio de no demasiado uso de las energías y/o combustibles
 
 
 
