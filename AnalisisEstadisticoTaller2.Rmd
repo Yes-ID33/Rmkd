@@ -12,10 +12,12 @@ output:
     code_folding: show
     
 date: "2024-10-24"
+
+author: ":)"
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 library(knitr)
 library(tidyverse)
 library(plotly)
@@ -28,53 +30,62 @@ library(ggplot2)
 
 ```
 
-# Visualización de los datos
-
 ```{r}
-
+# Cargamos los datos aqui para su posterior uso
 dfEnergiaPaises <- read.csv("./datos_taller_02.csv", header = TRUE, sep=';')
-
-dfEnergiaPaises
-
 ```
 
 
-## Primeros puntos
 
-### Punto 1
+## Punto 1
+
 ```{r}
 
-
-# Select the 5 variables of interest
+# Seleccion de 5 variables
 selected_data <- dfEnergiaPaises[, c("Distillate_fuel_oil_consumption_TBPD","Jet_fuel_consumption_TBPD", "Motor_gasoline_consumption_TBPD","Petroleum_and_other_liquids_consumption_TBPD","Electricity_net_consumption_BKWH")]
 
-# Calculate the mean vector
+# Calcular el promedio de las columnas
 prom_vector <- colMeans(selected_data, na.rm = TRUE)
 
-# Calculate the variance-covariance matrix
+# Calcular la matriz de variancia y covariancia
 var_cov_matrix <- cov(selected_data, use = "complete.obs")
 
-# Display the results
-print("Vector de los promedios:")
-print(prom_vector)
-
-print("Variance-Covariance Matrix:")
-print(var_cov_matrix)
-
 ```
-### Punto 2
+
+
+#### Vector de promedios para las 5 variables 
+
+#### Estas variables fueron elegidas en base a consumos de combustibles fosibles y electricidad
+
+```{r}
+print(prom_vector)
+```
+
+#### Matriz de variancia y covariancia
+
+```{r}
+print(var_cov_matrix)
+```
+
+## Punto 2
+
+> Realizamos el analisis univariado de cada una de las variables (Exeptuando el nombre de los paises o únicamente valore cuantitativos) para obtener las medidas de tendencia central.
 ```{r}
 #Análisis descriptivo univariado
-summary(dfEnergiaPaises)
 
+summary(dfEnergiaPaises)
+```
+
+> El analisis descriptivo bivariado permite observar la correlacion entre cada una de las 5 variables seleccionadas 
+
+```{r}
 #Análisis descriptivo bivariado relaciones par-par
 
-# The `ggpairs()` function allows us to visualize both distributions and correlations between variables.
 
 # Visualizing pairwise relationships between variables
 ggpairs(selected_data)
-
 ```
+
 
 ### Punto 3
 ```{r}
